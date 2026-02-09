@@ -1,9 +1,4 @@
-import { requireKey } from "./_lib/auth.mjs";
-
-export default async (req) => {
-  const auth = requireKey(req);
-  if (!auth.ok) return auth.res;
-
+export default async () => {
   return new Response(
     JSON.stringify(
       {

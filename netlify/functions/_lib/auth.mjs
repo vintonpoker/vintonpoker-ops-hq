@@ -1,3 +1,6 @@
+// Reserved for later: function-level API key gating.
+// v1 relies on Netlify site password protection.
+
 export function requireKey(req) {
   const expected = process.env.VP_HQ_API_KEY;
   if (!expected) {

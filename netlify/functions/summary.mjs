@@ -1,9 +1,4 @@
-import { requireKey } from "./_lib/auth.mjs";
-
-export default async (req) => {
-  const auth = requireKey(req);
-  if (!auth.ok) return auth.res;
-
+export default async () => {
   // v1 mock payload; will be replaced by provider fetch + normalization
   const now = new Date().toISOString();
   return new Response(
