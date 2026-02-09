@@ -1,21 +1,19 @@
-import { requireKey } from "./_lib/auth.mjs";
+import { requireSession, jsonRes } from "./_lib/session.mjs";
 
 export default async (req) => {
-  const auth = requireKey(req);
+  const auth = requireSession(req);
   if (!auth.ok) return auth.res;
 
-  return new Response(
-    JSON.stringify(
+  return jsonRes({
+    ok: true,
+    generatedAt: new Date().toISOString(),
+    alerts: [
       {
-        ok: true,
-        generatedAt: new Date().toISOString(),
-        alerts: [
-          { id: "stub-1", severity: "info", title: "Alerts endpoint is stubbed", detail: "Wire provider checks next." },
-        ],
+        id: "stub-1",
+        severity: "info",
+        title: "Alerts endpoint is stubbed",
+        detail: "Wire provider checks next.",
       },
-      null,
-      2
-    ),
-    { headers: { "content-type": "application/json" } }
-  );
+    ],
+  });
 };
