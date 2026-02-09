@@ -61,7 +61,32 @@ export default async (req) => {
 
   try {
     const [forms, tags] = await Promise.all([kitListForms(), kitListTags()]);
-    kit = { status: "ok", forms: forms.length, tags: tags.length };
+
+    const keyTagNames = [
+      "Masterclass Prospect",
+      "Masterclass Customer",
+      "DKC WOLH Prospect",
+      "DKC WOLH Customer",
+      "In: AI Operator Bootcamp",
+      "In: Customer to Affiliate",
+      "Completed: Affiliate Activation",
+    ];
+
+    const tagCounts = {};
+    for (const name of keyTagNames) {
+      const t = (tags || []).find((x) => x?.name === name);
+      // Kit v4 tag objects may include `subscriber_count`; if not, we still surface presence.
+      tagCounts[name] = t
+        ? { id: t.id, subscriber_count: t.subscriber_count ?? null }
+        : { id: null, subscriber_count: null };
+    }
+
+    kit = {
+      status: "ok",
+      forms: forms.length,
+      tags: tags.length,
+      keyTagCounts: tagCounts,
+    };
   } catch (e) {
     kit = { status: "error", error: e?.message || String(e) };
   }
