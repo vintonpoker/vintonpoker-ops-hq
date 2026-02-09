@@ -1,6 +1,7 @@
 import { requireSession, jsonRes } from "./_lib/session.mjs";
 import { startOfDayMs, rangeUnixSeconds } from "./_lib/time.mjs";
 import { sumBalanceTransactions } from "./_lib/stripe.mjs";
+import { kitListForms, kitListTags } from "./_lib/kit.mjs";
 
 function dollars(cents) {
   return Math.round((cents / 100) * 100) / 100;
@@ -32,6 +33,8 @@ export default async (req) => {
   let revenue = { yesterday: 0, last7d: 0, mtd: 0 };
   let refunds = { yesterday: 0, last7d: 0, mtd: 0 };
 
+  let kit = { status: "stub" };
+
   try {
     const [y, w, m] = await Promise.all([
       sumBalanceTransactions(yRange),
@@ -56,6 +59,13 @@ export default async (req) => {
     stripe = { status: "error", error: e?.message || String(e) };
   }
 
+  try {
+    const [forms, tags] = await Promise.all([kitListForms(), kitListTags()]);
+    kit = { status: "ok", forms: forms.length, tags: tags.length };
+  } catch (e) {
+    kit = { status: "error", error: e?.message || String(e) };
+  }
+
   return jsonRes({
     ok: true,
     generatedAt: new Date().toISOString(),
@@ -69,7 +79,7 @@ export default async (req) => {
     },
     sources: {
       stripe,
-      kit: { status: "stub" },
+      kit,
       youtube: { status: "stub" },
       netlify: { status: "stub" },
       refersion: { status: "stub" },
