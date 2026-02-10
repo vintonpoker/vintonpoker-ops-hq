@@ -3,12 +3,12 @@ import Login from "./Login";
 
 type Summary = any;
 type AlertsResp = any;
-type EventsResp = any;
+type SnapshotSummaryResp = any;
 
 export default function CommandCenter() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [alerts, setAlerts] = useState<AlertsResp | null>(null);
-  const [events, setEvents] = useState<EventsResp | null>(null);
+  const [snapSummary, setSnapSummary] = useState<SnapshotSummaryResp | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [needsLogin, setNeedsLogin] = useState(false);
 
@@ -16,27 +16,27 @@ export default function CommandCenter() {
     setErr(null);
     setNeedsLogin(false);
     try {
-      const [sRes, aRes, eRes] = await Promise.all([
+      const [sRes, aRes, ssRes] = await Promise.all([
         fetch("/.netlify/functions/summary"),
         fetch("/.netlify/functions/alerts"),
-        fetch("/.netlify/functions/events-summary"),
+        fetch("/.netlify/functions/snapshot-summary"),
       ]);
 
-      if (sRes.status === 401 || aRes.status === 401 || eRes.status === 401) {
+      if (sRes.status === 401 || aRes.status === 401 || ssRes.status === 401) {
         setNeedsLogin(true);
         return;
       }
 
       if (!sRes.ok) throw new Error(`Summary failed: ${sRes.status}`);
       if (!aRes.ok) throw new Error(`Alerts failed: ${aRes.status}`);
-      if (!eRes.ok) throw new Error(`Events failed: ${eRes.status}`);
+      if (!ssRes.ok) throw new Error(`Snapshot summary failed: ${ssRes.status}`);
 
       const s = await sRes.json();
       const a = await aRes.json();
-      const e = await eRes.json();
+      const ss = await ssRes.json();
       setSummary(s);
       setAlerts(a);
-      setEvents(e);
+      setSnapSummary(ss);
     } catch (e: any) {
       setErr(e?.message || String(e));
     }
@@ -54,14 +54,24 @@ export default function CommandCenter() {
       <p style={{ color: "#666" }}>Command Center (v1)</p>
       {err && <pre style={{ color: "crimson" }}>{err}</pre>}
 
+      <button
+        onClick={async () => {
+          await fetch("/.netlify/functions/snapshot", { method: "POST" });
+          await load();
+        }}
+        style={{ margin: "12px 0", padding: "10px 14px" }}
+      >
+        Take Snapshot Now
+      </button>
+
       <h2>Scoreboard</h2>
       <pre>{JSON.stringify(summary?.scoreboard ?? null, null, 2)}</pre>
 
       <h2>Alerts</h2>
       <pre>{JSON.stringify(alerts?.alerts ?? null, null, 2)}</pre>
 
-      <h2>Kit activity (from webhooks)</h2>
-      <pre>{JSON.stringify(events?.summary ?? null, null, 2)}</pre>
+      <h2>Snapshot deltas</h2>
+      <pre>{JSON.stringify(snapSummary?.deltas ?? null, null, 2)}</pre>
 
       <h2>Sources</h2>
       <pre>{JSON.stringify(summary?.sources ?? null, null, 2)}</pre>
