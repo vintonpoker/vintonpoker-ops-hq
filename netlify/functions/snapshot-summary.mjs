@@ -16,27 +16,47 @@ export default async (req) => {
   const auth = requireSession(req);
   if (!auth.ok) return auth.res;
 
-  const keys = await listSnapshotKeys({ limit: 10 });
-  const sorted = keys.sort().reverse();
+  try {
+    const keys = await listSnapshotKeys({ limit: 10 });
+    const sorted = (keys || []).slice().sort().reverse();
 
-  const latestKey = sorted[0] || null;
-  const prevKey = sorted[1] || null;
+    const latestKey = sorted[0] || null;
+    const prevKey = sorted[1] || null;
 
-  const latest = latestKey ? await getSnapshot(latestKey) : null;
-  const prev = prevKey ? await getSnapshot(prevKey) : null;
+    const latest = latestKey ? await getSnapshot(latestKey) : null;
+    const prev = prevKey ? await getSnapshot(prevKey) : null;
 
-  const deltas = latest && prev ? {
-    revenueYesterdayDelta: diff(latest?.scoreboard?.revenue?.yesterday, prev?.scoreboard?.revenue?.yesterday),
-    refundsYesterdayDelta: diff(latest?.scoreboard?.refunds?.yesterday, prev?.scoreboard?.refunds?.yesterday),
-  } : null;
+    const deltas =
+      latest && prev
+        ? {
+            revenueYesterdayDelta: diff(
+              latest?.scoreboard?.revenue?.yesterday,
+              prev?.scoreboard?.revenue?.yesterday
+            ),
+            refundsYesterdayDelta: diff(
+              latest?.scoreboard?.refunds?.yesterday,
+              prev?.scoreboard?.refunds?.yesterday
+            ),
+          }
+        : null;
 
-  return jsonRes({
-    ok: true,
-    generatedAt: new Date().toISOString(),
-    latestKey,
-    prevKey,
-    latest,
-    prev,
-    deltas,
-  });
+    return jsonRes({
+      ok: true,
+      generatedAt: new Date().toISOString(),
+      latestKey,
+      prevKey,
+      latest,
+      prev,
+      deltas,
+    });
+  } catch (e) {
+    return jsonRes(
+      {
+        ok: false,
+        error: e?.message || String(e),
+        where: "snapshot-summary",
+      },
+      200
+    );
+  }
 };
