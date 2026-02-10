@@ -1,6 +1,6 @@
 [build]
   base = "."
-  command = "cd dashboard && npm ci && npm run build"
+  command = "npm ci && cd dashboard && npm ci && npm run build"
   publish = "dashboard/dist"
 
 [functions]
