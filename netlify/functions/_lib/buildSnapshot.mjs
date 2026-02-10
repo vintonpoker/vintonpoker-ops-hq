@@ -89,7 +89,13 @@ export async function buildSnapshot({ tzOffsetMinutes = -7 * 60 } = {}) {
       keyTagCounts,
     };
   } catch (e) {
-    snapshot.sources.kit = { status: "error", error: e?.message || String(e) };
+    const status = e?.status;
+    const base = e?.message || String(e);
+    const hint =
+      status === 401
+        ? " (401 unauthorized — check Netlify env var KIT_API_KEY is a valid Kit v4 token)"
+        : "";
+    snapshot.sources.kit = { status: "error", error: base + hint };
   }
 
   return snapshot;
