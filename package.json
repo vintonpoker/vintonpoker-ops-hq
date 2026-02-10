@@ -1,0 +1,27 @@
+{
+  "name": "vintonpoker-ops-hq",
+  "version": "1.0.0",
+  "description": "Vinton Poker Ops HQ: metrics, dashboard, and automation",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vintonpoker/vintonpoker-ops-hq.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/vintonpoker/vintonpoker-ops-hq/issues"
+  },
+  "homepage": "https://github.com/vintonpoker/vintonpoker-ops-hq#readme",
+  "dependencies": {
+    "@netlify/blobs": "^10.6.0"
+  }
+}
