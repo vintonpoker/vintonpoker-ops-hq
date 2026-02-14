@@ -12,6 +12,10 @@ function diff(a, b) {
   return Math.round((A - B) * 100) / 100;
 }
 
+function tagCount(snapshot, tagName) {
+  return snapshot?.sources?.kit?.keyTagCounts?.[tagName]?.subscriber_count ?? null;
+}
+
 export default async (req) => {
   const auth = requireSession(req);
   if (!auth.ok) return auth.res;
@@ -37,6 +41,11 @@ export default async (req) => {
               latest?.scoreboard?.refunds?.yesterday,
               prev?.scoreboard?.refunds?.yesterday
             ),
+
+            masterclassProspectDelta: diff(tagCount(latest, "Masterclass Prospect"), tagCount(prev, "Masterclass Prospect")),
+            masterclassCustomerDelta: diff(tagCount(latest, "Masterclass Customer"), tagCount(prev, "Masterclass Customer")),
+            bootcampInDelta: diff(tagCount(latest, "In: AI Operator Bootcamp"), tagCount(prev, "In: AI Operator Bootcamp")),
+            affiliateCompletedDelta: diff(tagCount(latest, "Completed: Affiliate Activation"), tagCount(prev, "Completed: Affiliate Activation")),
           }
         : null;
 
@@ -45,18 +54,10 @@ export default async (req) => {
       generatedAt: new Date().toISOString(),
       latestKey,
       prevKey,
-      latest,
-      prev,
       deltas,
+      // Keep payload small in UI; full snapshots still accessible via blob keys if needed later.
     });
   } catch (e) {
-    return jsonRes(
-      {
-        ok: false,
-        error: e?.message || String(e),
-        where: "snapshot-summary",
-      },
-      200
-    );
+    return jsonRes({ ok: false, error: e?.message || String(e), where: "snapshot-summary" }, 200);
   }
 };

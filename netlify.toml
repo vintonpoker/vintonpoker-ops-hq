@@ -6,6 +6,18 @@
 [functions]
   directory = "netlify/functions"
 
+# SPA routing (React Router)
+# Keep Netlify Functions working, then send all other routes to index.html
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
 # placeholders for later
 # [build.environment]
 #   NODE_VERSION = "20"
